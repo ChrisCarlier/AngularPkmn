@@ -7,3 +7,4 @@ export class Pokemon {
     types: Array<string>;
     created: Date;
   }
+  

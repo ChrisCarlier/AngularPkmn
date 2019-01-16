@@ -13,8 +13,9 @@ export class PokemonsService {
 
   constructor(private http: HttpClient) { }
 
-  private pokemonUrl =  'http://nas-carlier.synology.me/api/pokemons';
-  private pokemonsUrl = 'http://nas-carlier.synology.me/api/pokemon';
+  private pokemonsUrl =  'http://nas-carlier.synology.me/api/pokemons';
+  private pokemonUrl = 'http://nas-carlier.synology.me/api/pokemon';
+  private pokemonEditUrl = 'http://nas-carlier.synology.me/api/pokemon/edit';
 
     private log(log: string) {
       // console.info(log);
@@ -23,7 +24,7 @@ export class PokemonsService {
     private handleError<T>(Operation= 'operation', result?: T) {
       return (error: any): Observable<T> => {
         console.log(error);
-        console.log('${operation} failed: ${error.message}');
+        console.log(`${Operation} failed: ${error.message}`);
 
         return of(result as T);
       };
@@ -31,7 +32,7 @@ export class PokemonsService {
 
     // Retourne tous les pokémons
     getPokemons(): Observable<Pokemon[]> {
-      return this.http.get<Pokemon[]>(this.pokemonUrl).pipe(
+      return this.http.get<Pokemon[]>(this.pokemonsUrl).pipe(
         tap(_ => this.log('fetched pokemons')),
         catchError(this.handleError('getPokemons', []))
       );
@@ -39,10 +40,21 @@ export class PokemonsService {
 
     // Retourne le pokémon avec l'identifiant passé en paramètre
     getPokemon(id: number): Observable<Pokemon> {
-      const url = `${this.pokemonsUrl}/${id}`;
+      const url = `${this.pokemonUrl}/${id}`;
       return this.http.get<Pokemon>(url).pipe(
       tap(_ => this.log('fetched pokemon id=${id}')),
-      catchError(this.handleError<Pokemon>('getPokemon id=${id}'))
+      catchError(this.handleError<Pokemon>(`getPokemon id=${id}`))
+      );
+    }
+
+    updatePokemon(pokemon: Pokemon): Observable<Pokemon> {
+      const httpOptions = {
+        headers: new HttpHeaders({'Content-type': 'application/json'})
+      };
+      const url = `${this.pokemonEditUrl}/${pokemon.id}`;
+      return this.http.put(url, pokemon, httpOptions).pipe(
+        tap(_ => this.log(`updated pokemon id=${pokemon.id}`)),
+        catchError(this.handleError<any>('updatedPokemon'))
       );
     }
 
